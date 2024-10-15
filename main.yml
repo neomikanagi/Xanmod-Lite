@@ -1,0 +1,136 @@
+name: build_main
+
+on:
+  schedule:
+    - cron: '1 1 1 * *'
+  workflow_dispatch:
+    inputs:
+      LLVM_VER:
+        description: 'LLVM_VER (Specify LLVM Version)'
+        required: true
+        default: '19'
+      KERNEL_VER:
+        description: 'KERNEL_VER (Specify XANMOD branch to build)'
+        required: true
+        default: '6.11'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - config: v1
+          - config: v2
+          - config: v3
+          - config: v4
+    name: "🚧 Build Xanmod for x86-64-${{matrix.config}}"
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Environment Variables
+        run: |
+          echo 'LLVM_VER   == > ${{ github.event.inputs.LLVM_VER }}'
+          echo 'KERNEL_VER == > ${{ github.event.inputs.KERNEL_VER }}'
+          
+      - name: Cleanup
+        uses: rokibhasansagar/slimhub_actions@main
+                 
+      - name: Install packages & setup
+        run: |
+          sudo apt update
+          sudo apt purge firefox -y
+          sudo apt upgrade
+          
+          sudo apt install \
+            wget \
+            build-essential \
+            bison \
+            flex \
+            pkg-config \
+            qtcreator \
+            qtbase5-dev \
+            qt5-qmake \
+            qttools5-dev-tools \
+            libssl-dev \
+            libncurses-dev \
+            git \
+            libelf-dev \
+            lz4 \
+            debhelper \
+            dh-virtualenv \
+            zstd \
+            elfutils -y
+            
+      - name: Setup Clang/LLVM
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ github.event.inputs.LLVM_VER }}
+          
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
+
+      - name: Clone Kernel Source
+        run: |
+          git clone --depth=1 https://gitlab.com/xanmod/linux -b ${{ github.event.inputs.KERNEL_VER }} kernel/xanmod
+
+      - name: Modify Configuration
+        run: |
+          cd kernel/xanmod
+          for config in v1 v2 v3 v4; do
+            while read -r line; do
+              sed -i "/$line/s/^.*$/# $line is not set/" CONFIGS/xanmod/gcc/config_x86-64-$config
+            done < ../../disable.config
+          done
+          
+      - name: Set Build Date
+        id: build_date
+        run: echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+        
+      - name: Run Build
+        run: |
+          cd kernel/xanmod
+          cp CONFIGS/xanmod/gcc/config_x86-64-${{ matrix.config }} arch/x86/configs/${{ matrix.config }}_defconfig 
+          
+          make clean
+          rm -rf vmlinux-gdb.py
+          export LLVM_SUFFIX=-${{ github.event.inputs.LLVM_VER }}
+          
+          ARGS='
+          CC=clang${LLVM_SUFFIX}
+          LD=ld.lld${LLVM_SUFFIX}
+          LLVM=1
+          LLVM_IAS=1
+          LLVM_SUFFIX=-${{ github.event.inputs.LLVM_VER }}            
+          LOCALVERSION=-xanmod-${{ github.event.inputs.KERNEL_VER }}-clang-${{ github.event.inputs.LLVM_VER }}
+          '
+          make ${ARGS} ${{ matrix.config }}_defconfig
+          make ${ARGS} deb-pkg -j$(nproc)
+          
+          cd ..
+          cp xanmod/.config config
+          rm -rf xanmod *.gz *.dsc *.buildinfo *.changes 
+          
+      - name: Upload-Kernel-to-Releases
+        uses: ncipollo/release-action@main
+        with:
+          tag: xanmod-main-${{ matrix.config }}-${{ env.BUILD_DATE }}
+          artifacts: kernel/*
+          allowUpdates: true
+          removeArtifacts: false
+          token: ${{ secrets.RELEASE_TOKEN }}
+          body: |
+            ### Xanmod Kernel Build Information
+            - Kernel build version: ${{ github.event.inputs.KERNEL_VER }}
+            - LLVM Version: ${{ github.event.inputs.LLVM_VER }}
+          draft: false
+          prerelease: false
+          generateReleaseNotes: false
