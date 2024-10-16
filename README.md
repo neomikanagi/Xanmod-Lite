@@ -16,106 +16,33 @@ If you download and use it, it means that you agree that freedom of speech and t
 ## Summary of Disabled Features
 The disable.config file disables a wide range of kernel configuration items to streamline system functionality and remove unnecessary hardware support. Below is a summary of the main disabled items:
 
-1. Sound Subsystem Drivers
-All sound subsystem (SoC) drivers have been disabled, including various audio codecs, power amplifiers, and audio processors (e.g., SSM2602_SPI, SND_SOC_TAS2552, SND_SOC_TLV320AIC23, SND_SOC_WM5102, SND_SOC_WCD9335).
-This affects support for various sound cards and high-fidelity audio processing hardware.
+1. **Hardware Support and Drivers**
+   - **Legacy Hardware Interfaces and Protocols**: Options like `CONFIG_PARPORT` (parallel port), `CONFIG_PATA` (Parallel ATA), and `CONFIG_PCMCIA` (PCMCIA cards) are disabled because they support legacy hardware that is not used in modern VPS environments.
+   - **Specialized Hardware Drivers**: Configurations like `CONFIG_AMILO`, `CONFIG_HP`, `CONFIG_THINKPAD`, and `CONFIG_TOSHIBA`, which support specific vendor hardware, are disabled as they are not needed in a VPS setting.
+   - **Wireless Devices and Sensors**: Drivers for wireless devices and sensors, such as `CONFIG_WIRELESS`, `CONFIG_WLAN`, `CONFIG_BMC150`, and `CONFIG_BME680`, are disabled since VPS instances do not interact directly with such hardware.
+   - **Legacy Network Protocols and Interfaces**: Protocols like `CONFIG_ARCNET`, `CONFIG_FDDI`, `CONFIG_DECNET`, and `CONFIG_ATM` are outdated and not used in modern network environments, making them unnecessary for a VPS.
 
-2. Video Device Drivers
-Many video device drivers have been disabled, covering video capture, decoding, tuners, and signal processing chips (e.g., VIDEO_SAA7146, VIDEO_TW9900, VIDEO_TC358743, VIDEO_TDA7419, VIDEO_TEA6415C).
-This removes support for various cameras, video decoding devices, and TV tuners.
+2. **Multimedia and Input Devices**
+   - **Multimedia and Graphics Drivers**: Options like `CONFIG_DRM` (Direct Rendering Manager), `CONFIG_FB` (frame buffer), `CONFIG_V4L`, and `CONFIG_DVB` (Digital Video Broadcasting) are disabled, as VPS servers do not require multimedia or graphics support.
+   - **Input Devices**: Configurations like `CONFIG_HID`, `CONFIG_HIDRAW`, `CONFIG_TOUCHSCREEN`, `CONFIG_JOYSTICK`, and `CONFIG_MOUSE` are disabled because VPS instances do not require user input devices like keyboards, mice, or touchscreens.
+   - **Sound and Audio Drivers**: Audio-related options like `CONFIG_SND`, `CONFIG_SOUND`, and `CONFIG_SOUNDWIRE` are disabled, as audio functionality is not required in a typical VPS environment.
 
-3. Wireless Networking Drivers
-Support for wireless networking devices, including WiFi and cellular network modules, has been disabled (e.g., WLAN_VENDOR_INTEL, WLAN_VENDOR_REALTEK, WLAN_VENDOR_MEDIATEK, WIRELESS_EXT, WWAN).
-This impacts the functionality of WiFi devices, cellular data modules, and other wireless networking components.
+3. **Power Management and Hardware Monitoring**
+   - **Power Management**: Options like `CONFIG_ACPI`, `CONFIG_PM`, `CONFIG_BATTERY`, `CONFIG_HIBERNATION`, and `CONFIG_SUSPEND` are disabled since VPS instances do not manage power states or use battery power.
+   - **Hardware Monitoring**: Features like `CONFIG_HWMON` and `CONFIG_SENSORS` are disabled, as hardware monitoring (e.g., temperature, fan speed) is not applicable in a virtualized environment.
 
-4. X86 Machine Check and Virtualization Support
-X86 architecture machine check exception (MCE) and virtualization support have been disabled (e.g., X86_MCE_AMD, X86_MCE_INTEL, X86_SGX_KVM, XEN_SYS_HYPERVISOR).
-This affects hardware error detection and virtualization features.
+4. **Virtualization and Debug Tools**
+   - **Virtualization Optimizations**: Options such as `CONFIG_XEN_*`, `CONFIG_HYPERV`, and `CONFIG_KVM` are disabled if the VPS is not running on the corresponding virtualization platform, as these options are specific to Xen, Hyper-V, and KVM environments.
+   - **Debugging and Tracing Tools**: Options like `CONFIG_DEBUG`, `CONFIG_TRACE`, and `CONFIG_TRACING` are disabled because they are used for kernel debugging and are not necessary for production VPS environments.
 
-5. Xen Hypervisor Support
-Xen hypervisor support has been disabled (e.g., XEN_SYS_HYPERVISOR).
-This removes the ability to manage virtual machines through the Xen hypervisor.
+5. **File System and Storage**
+   - **Legacy or Uncommon File Systems**: File systems like `CONFIG_JFS`, `CONFIG_XFS`, and `CONFIG_BTRFS` are disabled if not used by the VPS, as modern VPS instances often use mainstream file systems like ext4.
+   - **Uncommon Storage Protocols**: Options like `CONFIG_SCSI` and `CONFIG_MTD` are disabled since they support specific storage devices or protocols that are not relevant to most VPS environments.
 
-6. XFS File System Support
-XFS file system support has been disabled (e.g., XFS_FS).
-This removes support for the high-performance journaling file system commonly used in large storage systems.
+6. **Networking and Security Features**
+   - **Uncommon Network Drivers and Protocols**: Configurations like `CONFIG_CAN`, `CONFIG_NET_FDDI`, and `CONFIG_NET_VENDOR_*` are disabled because they support specialized network hardware or outdated protocols.
+   - **Uncommon Security and Encryption**: Options like `CONFIG_CRYPTO` and `CONFIG_TRUSTED` are disabled as VPS instances typically do not use specialized hardware encryption modules.
 
-7. USB Network and Cellular Modules Support
-Support for several USB network and cellular modules has been disabled (e.g., USB_NET_QMI_WWAN, USB_SERIAL_SIERRAWIRELESS, USB_SERIAL_WWAN).
-This impacts the use of USB-connected wireless data cards and cellular network modules.
-
-8. TV Signal Processors and Video Decoders
-Support for TV signal processing and video decoding chips has been disabled (e.g., VIDEO_TVP514X, VIDEO_TDA7432, VIDEO_TDA7419, VIDEO_TW5864, VIDEO_TW9910).
-This affects the ability to process analog TV signals and video decoding.
-
-9. USB Video Capture Cards
-Support for USB video capture devices has been disabled (e.g., VIDEO_USBTV).
-USB video capture cards will no longer be supported.
-
-10. Audio Compression Processing
-Support for audio data compression and decompression has been disabled (e.g., SND_SOC_COMPRESS).
-This impacts audio data compression functionality.
-
-11. SoC Cross-Platform Audio Support
-Support for cross-platform SoC audio modules has been disabled (e.g., SND_SOC_TOPOLOGY, SND_SOC_XILINX_I2S, SND_SOC_CS35L41).
-This impacts audio handling in embedded systems.
-
-12. Audio Power Amplifiers
-Support for several audio power amplifiers has been disabled (e.g., SND_SOC_TPA6130A2, SND_SOC_WM5102, SND_SOC_CS35L41).
-These components are typically used to drive high-volume audio output devices.
-
-13. Video Tuner Support
-Support for various video tuners has been disabled (e.g., VIDEO_TUNER, VIDEO_TEA6415C, VIDEO_TEA6420, VIDEO_THP7312).
-This removes TV tuning and signal processing capabilities.
-
-14. Machine Check Exception Logging
-Machine check exception logging has been disabled (e.g., X86_MCELOG_LEGACY).
-This impacts the system's ability to log and report hardware errors.
-
-15. Embedded System Video Support
-Support for video input, output, and processing in embedded systems has been disabled (e.g., VIDEO_VIM2M, VIDEO_VIMC, VIDEO_V4L2_I2C).
-This affects video handling in embedded platforms.
-
-16. SoC DSP Audio Processing
-Support for several SoC digital signal processors (DSP) for audio processing has been disabled (e.g., SND_SOC_WM_ADSP, SND_SOC_TLV320AIC32X4, SND_SOC_WM8770).
-This impacts DSP audio processing capabilities.
-
-17. SoC Audio Libraries
-Support for multiple SoC audio libraries has been disabled (e.g., SND_SOC_CS35L41_LIB, SND_SOC_TLV320AIC32X4_LIB, SND_SOC_WM_ADSP).
-Common libraries for audio signal processing will no longer be supported.
-
-18. Video Graphics Hardware Acceleration
-Support for hardware acceleration for graphics and video has been disabled (e.g., VIDEO_THS8200, VIDEO_THS7303, VIDEO_TDA7432).
-This affects the ability to perform hardware-accelerated video rendering.
-
-19. i2c Interface Video Support
-Support for several i2c interface video devices has been disabled (e.g., VIDEO_V4L2_I2C, VIDEO_TLV320AIC23_I2C, VIDEO_WM8739_I2C).
-This affects video processing over i2c-connected devices.
-
-20. SoundWire Bus Support
-Support for SoundWire bus audio devices has been disabled (e.g., SND_SOC_WCD938X_SDW, SND_SOC_CS35L41_SDW).
-This impacts audio data transfer over the SoundWire bus.
-
-21. Serial Interface Video Processing
-Support for several serial interface video devices has been disabled (e.g., VIDEO_TLV320AIC23_SPI, VIDEO_WM8731_SPI, VIDEO_TLV320_SPI).
-This affects serial bus-connected video processing devices.
-
-22. Audio Microphone Detection
-Support for audio microphone detection has been disabled (e.g., SND_SOC_WCD_MBHC).
-Microphone detection and configuration functionality is disabled.
-
-23. Multimedia Subsystem Devices
-Support for several multimedia subsystem-related devices has been disabled (e.g., VIDEO_SOLO6X10, VIDEO_TEA6420, VIDEO_VIM2M).
-This impacts devices related to multimedia signal processing.
-
-24. Wireless Hotkey Support
-Support for wireless network hotkey functionality has been disabled (e.g., WIRELESS_HOTKEY, WIRELESS_EXT).
-Hotkey functionality for controlling wireless networks is no longer available.
-
-25. Embedded Audio Compression Devices
-Support for several embedded audio compression devices has been disabled (e.g., SND_SOC_CX2072X, SND_SOC_CS35L35, SND_SOC_TLV320AIC23).
-Audio compression and decompression functionality is impacted.
-
-26. USB Audio Device Support
-Support for several USB audio devices has been disabled (e.g., SND_SOC_USB, SND_SOC_WM8804_USB, SND_SOC_CS35L41_USB).
-USB audio input and output devices are no longer supported.
+7. **Special Purpose Hardware and Embedded Device Support**
+   - **Sensors and Embedded Devices**: Configurations like `CONFIG_I2C`, `CONFIG_SPI`, `CONFIG_FPGA`, and `CONFIG_GPIO` are disabled, as they support sensors and embedded hardware that are not present in a virtualized environment.
+   - **Specialized Devices and Controllers**: Options like `CONFIG_MFD`, `CONFIG_PMIC`, and `CONFIG_PMBUS` are disabled since they are used for managing embedded hardware and power controllers, which are irrelevant for VPS instances.
