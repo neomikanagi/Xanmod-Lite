@@ -57,7 +57,8 @@ jobs:
             debhelper \
             dh-virtualenv \
             zstd \
-            elfutils
+            elfutils \
+            bc
 
       - name: Setup Clang/LLVM
         run: |
