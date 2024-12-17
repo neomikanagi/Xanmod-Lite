@@ -12,7 +12,7 @@ on:
       KERNEL_VER:
         description: 'KERNEL_VER (Specify XANMOD branch to build)'
         required: true
-        default: '6.11'
+        default: '6.12'
 
 jobs:
   build:
@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        config: [v1, v2, v3, v4]
+        config: [v1, v2, v3]
     name: "🚧 Build Xanmod for x86-64-${{matrix.config}}"
 
     steps:
@@ -79,7 +79,7 @@ jobs:
       - name: Modify Configuration
         run: |
           cd kernel/xanmod
-          for config in v1 v2 v3 v4; do
+          for config in v1 v2 v3; do
             while read -r line; do
               sed -i "/$line/s/^.*$/# $line is not set/" CONFIGS/xanmod/gcc/config_x86-64-$config
             done < ../../disable.config
